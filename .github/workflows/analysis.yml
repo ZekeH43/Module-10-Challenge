@@ -1,0 +1,27 @@
+name: Clustering analysis and notebook
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install analysis dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Unit tests and reproducibility
+        run: python -m unittest discover -s tests -v
+      - name: Execute original notebook in fresh kernel
+        run: python scripts/run_notebook.py
+      - name: Run CLI and validate artifacts
+        run: python crypto_clustering.py --output-dir /tmp/crypto-analysis
